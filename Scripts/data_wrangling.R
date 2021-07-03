@@ -99,7 +99,7 @@ setDT(cases1)[, .N, by=xnmbr]
 setDT(lscmi)[, .N, by=xnmbr]
 
 ## 9512 cases that had one disposition only
-one_disp <- disp1[, .N, by=xnmbr][N<=1] 
+disp1[, .N, by=xnmbr][N<=1][]
 
 ## remove cases that had one disposition only from disp1
 # disp1 <- disp1[!(xnmbr %in% one_disp$xnmbr),]
@@ -117,9 +117,7 @@ case_disp <- merge(disp1, cases1, by=c("xnmbr","crt_case_nmbr"))
 
 # convert to date type
 cols <- c('case_grant_date', 'sup_close_date', 'dispo_date')
-case_disp <- setDT(case_disp)[,  (cols)
-                                := lapply(.SD, as.Date, as.POSIXlt, format="%m/%d/%Y"), 
-                                .SDcols=cols]
+case_disp <- setDT(case_disp)[,  (cols) := lapply(.SD, as.Date, as.POSIXlt, format="%m/%d/%Y"), .SDcols=cols]
 
 #extract year and month
 setDT(case_disp)[, `:=`(year_grant=as.integer(year(case_grant_date)),
@@ -237,7 +235,6 @@ result_flash <- map2(.x = grant_year$Year,
 
 # output the result into a data frame
 (grant_year_flash <- data.frame(grant_year, Flash_Incarceration = unlist(result_flash)))
-
 
 
 ######################
