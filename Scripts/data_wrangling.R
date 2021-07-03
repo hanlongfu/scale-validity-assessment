@@ -143,10 +143,7 @@ grant_year <- setDT(grant_year)[order(Grant_Type, Year)]
 
 # function to calculate the number of probationers by grant type and year
 grant_year_prob <- function(year, grant_type, dat){
-  temp <- dat[year_grant == year &
-        cnt_grant_type_ind == grant_type, 
-      .N, 
-      by=xnmbr]
+  temp <- dat[year_grant == year & cnt_grant_type_ind == grant_type, .N, by=xnmbr]
   nrow(temp)
 }
 
@@ -186,9 +183,8 @@ case_disp[dispo_code %chin% revoke_code_cond, ind :=
 case_disp1 <- case_disp %>% 
   group_by(xnmbr, crt_case_nmbr, cnt_nmbr) %>% 
   mutate(indicator = map_dbl(row_number(), 
-                             ~ifelse(dispo_code[.] %chin% revoke_code_cond & any(dispo_code[.:n()] %chin% revoke_cond), 
-                                     1,                  # yes, it fits the criteria - 1
-                                     0)))                # no, it doesn't fit the criteria - 0
+                            # 1 - fits the criteria, 0 - doesn't fit the critiera
+                             ~ifelse(dispo_code[.] %chin% revoke_code_cond & any(dispo_code[.:n()] %chin% revoke_cond), 1, 0)))        
 
 # remaining revocations codes coded as 1
 case_disp1$indicator[case_disp1$dispo_code %chin% revoke_code] <- 1
