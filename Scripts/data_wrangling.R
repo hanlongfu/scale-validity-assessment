@@ -162,27 +162,28 @@ revoke_code <- c("K3", "K8", "K9","KD", "KG","KH","KP","KL","PJ","T7")
 
 #conditional codes only used when they precede the following:
 #UA, UB, UC, UD, UN, P7, PD, CJ, CB, CL, CC, CQ
-revoke_cond <- c("UA", "UB", "UC", "UD", "UN", "P7", "PD", "CJ", "CB", 
-                 "CL", "CC", "CQ")
 revoke_code_cond <- c("K0","K1","K2","K4","K5","KA","KC","KF","KI","KJ",
                       "P0","PR","R2","ZC","ZR")
+
+# these are the condition codes                  
+revoke_cond <- c("UA", "UB", "UC", "UD", "UN", "P7", "PD", "CJ", "CB", 
+                 "CL", "CC", "CQ")
 
 # get the indices of the rows that meet the condition described above [no longer used - only counting adjacent rows]
 # revoke_index <- case_disp$dispo_code %in% revoke_code_cond & dplyr::lag(case_disp$dispo_code) %in% revoke_cond
 
 # create a indicator for conditional revocation code 
+# .SD is equivalent to case_disp[dispo_code %chin% revoke_code_cond]
 case_disp[, c("row_num", "ind") := .(.I, 0L)]
 case_disp[dispo_code %chin% revoke_code_cond, ind := 
-                case_disp[dispo_code %chin% revoke_cond][.SD, 
-                                                         on=.(xnmbr, row_num>row_num), mult="first", +(.N>0),
-                                                         by=.EACHI]$N]
+                case_disp[dispo_code %chin% revoke_cond][.SD, on=.(xnmbr, row_num>row_num), mult="first", .N, by=.EACHI]$N]
 
 # A different way of implementing the idea
 case_disp1 <- case_disp %>% 
   group_by(xnmbr, crt_case_nmbr, cnt_nmbr) %>% 
   mutate(indicator = map_dbl(row_number(), 
                             # 1 - fits the criteria, 0 - doesn't fit the critiera
-                             ~ifelse(dispo_code[.] %chin% revoke_code_cond & any(dispo_code[.:n()] %chin% revoke_cond), 1, 0)))        
+                             ~ifelse(dispo_code[.x] %chin% revoke_code_cond & any(dispo_code[.x:n()] %chin% revoke_cond), 1, 0)))        
 
 # remaining revocations codes coded as 1
 case_disp1$indicator[case_disp1$dispo_code %chin% revoke_code] <- 1
