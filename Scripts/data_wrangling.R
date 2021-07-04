@@ -173,17 +173,17 @@ revoke_cond <- c("UA", "UB", "UC", "UD", "UN", "P7", "PD", "CJ", "CB",
 # revoke_index <- case_disp$dispo_code %in% revoke_code_cond & dplyr::lag(case_disp$dispo_code) %in% revoke_cond
 
 # create a indicator for conditional revocation code 
-# .SD is equivalent to case_disp[dispo_code %chin% revoke_code_cond]
 case_disp[, c("row_num", "ind") := .(.I, 0L)]
 case_disp[dispo_code %chin% revoke_code_cond, ind := 
+                  # .SD is equivalent to case_disp[dispo_code %chin% revoke_code_cond]
                 case_disp[dispo_code %chin% revoke_cond][.SD, on=.(xnmbr, row_num>row_num), mult="first", .N, by=.EACHI]$N]
 
-# A different way of implementing the idea
-case_disp1 <- case_disp %>% 
-  group_by(xnmbr, crt_case_nmbr, cnt_nmbr) %>% 
-  mutate(indicator = map_dbl(row_number(), 
-                            # 1 - fits the criteria, 0 - doesn't fit the critiera
-                             ~ifelse(dispo_code[.x] %chin% revoke_code_cond & any(dispo_code[.x:n()] %chin% revoke_cond), 1, 0)))        
+# A more intuitive way to implement the conditional logic in dplyr
+# case_disp1 <- case_disp %>% 
+#   group_by(xnmbr, crt_case_nmbr, cnt_nmbr) %>% 
+#   mutate(indicator = map_dbl(row_number(), 
+#                             # 1 - fits the criteria, 0 - doesn't fit the critiera
+#                              ~ifelse(dispo_code[.x] %chin% revoke_code_cond & any(dispo_code[.x:n()] %chin% revoke_cond), 1, 0)))        
 
 # remaining revocations codes coded as 1
 case_disp1$indicator[case_disp1$dispo_code %chin% revoke_code] <- 1
