@@ -182,8 +182,8 @@ case_disp[dispo_code %chin% revoke_code_cond, ind :=
 # case_disp1 <- case_disp %>% 
 #   group_by(xnmbr, crt_case_nmbr, cnt_nmbr) %>% 
 #   mutate(indicator = map_dbl(row_number(), 
-#                             # 1 - fits the criteria, 0 - doesn't fit the critiera
-#                              ~ifelse(dispo_code[.x] %chin% revoke_code_cond & any(dispo_code[.x:n()] %chin% revoke_cond), 1, 0)))        
+#                             # 1 - fits the criteria, 0 - doesn't fit the criteria
+#                              ~fifelse(dispo_code[.x] %chin% revoke_code_cond & any(dispo_code[.x:n()] %chin% revoke_cond), yes = 1L, no = 0L)))        
 
 # remaining revocations codes coded as 1
 case_disp1$indicator[case_disp1$dispo_code %chin% revoke_code] <- 1
@@ -194,17 +194,19 @@ case_disp1$indicator[case_disp1$dispo_code %chin% revoke_code] <- 1
 
 # function to calculate # of revocations in each year per grant type
 num_rev_func <- function(year, grant_type, dat){
-  temp <- setDT(dat)[
+  setDT(dat)
+  keycols <- c('xnmbr', 'crt_case_nmbr', 'cnt_nmbr')
+  temp <- dat[
     year_grant == year &                        # year
       cnt_grant_type_ind == grant_type &        # grant type
       (dispo_code %chin% revoke_code | revoke_index) &     # disposition code
       dispo_date <= (case_grant_date %m+% months(36, abbreviate=T)),    # disposition date
     .N, 
-    by=.(xnmbr, crt_case_nmbr, cnt_nmbr)] 
+    by=keykeycols] 
   return(sum(temp[, N]))
 }
 
-# Calculate the revocations using the lookup table and the function
+# Calculate the revocations using the look-up table and the function
 result_revocation <- map2(.x = grant_year$Year, 
                           .y = grant_year$Grant_Type,
                           .f = ~{num_rev_func(.x, .y, case_disp)})
@@ -220,19 +222,21 @@ result_revocation <- map2(.x = grant_year$Year,
 
 # function to calculate # of flash incarcerations in each year per grant type
 num_flash_func <- function(year, grant_type, dat){
-  temp <- setDT(dat)[year_grant %in% year &                # year
+  setDT(dat)
+  keycols <- c('xnmbr', 'crt_case_nmbr')
+  temp <- dat[year_grant %in% year &                # year
                cnt_grant_type_ind %chin% grant_type &         # grant type 
                dispo_desc %chin% c("FLASH INCARCERATION", "ARRST WRRNT RECAL-FLASH INCARC") &    # disposition code
                dispo_date <= (case_grant_date %m+% months(36, abbreviate=T)),     # disposition date
              .N, 
-             by=.(xnmbr)]
+             keyby=keycols]
   return(nrow(temp))
 }
 
-# Calculate the flash incarcerations using the lookup table and the function
-result_flash <- map2(.x = grant_year$Year, 
+# Calculate the flash incarcerations using the look-up table and the function
+system.time(result_flash <- map2(.x = grant_year$Year, 
                      .y = grant_year$Grant_Type,
-                     .f = ~{num_flash_func(.x, .y, case_disp)})
+                     .f = ~{num_flash_func(.x, .y, case_disp)}))
 
 # output the result into a data frame
 (grant_year_flash <- data.frame(grant_year, Flash_Incarceration = unlist(result_flash)))
