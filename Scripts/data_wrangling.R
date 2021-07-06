@@ -259,8 +259,14 @@ case_disp0$revoked[case_disp0$dispo_desc %chin% revoke_code ] <- 1
 ######################
 
 case_disp_assmnt <- assmnt[case_disp0, 
-                           .(i.xnmbr, i.crt_case_nmbr,i.cnt_nmbr, i.dispo_date, i.dispo_code, i.dispo_desc, i.prob_stts_code, i.prim_chrg_code, i.pri_chrg_stt, i.pri_chrg_id, i.pri_chrg_deg, i.pri_chrg_lvl, i.case_stts_code, i.case_grant_date, i.sup_close_date, i.race, i.cnt_grant_type_ind, i.flash_inc, i.revoked, i.drug, i.sex, i.arson, i.cjis_charge_code, i.month_grant, i.year_grant, i.month_closing, i.year_closing, x.assmnt_date, x.total_score, x.criminal_hist, x.edu_emp, x.fam_marital, x.leisure_rec, x.company, x.alcohol_drug, x.pao, x.antisocial), 
-                        nomatch=0,on = .(xnmbr = xnmbr, assmnt_date <= sup_close_date, assmnt_date >= case_grant_date)]
+                           .(i.xnmbr, i.crt_case_nmbr,i.cnt_nmbr, i.dispo_date, i.dispo_code, i.dispo_desc, 
+                             i.prob_stts_code, i.prim_chrg_code, i.pri_chrg_stt, i.pri_chrg_id, i.pri_chrg_deg, 
+                             i.pri_chrg_lvl, i.case_stts_code, i.case_grant_date, i.sup_close_date, i.race, 
+                             i.cnt_grant_type_ind, i.flash_inc, i.revoked, i.drug, i.sex, i.arson, i.cjis_charge_code, 
+                             i.month_grant, i.year_grant, i.month_closing, i.year_closing, x.assmnt_date, 
+                             x.total_score, x.criminal_hist, x.edu_emp, x.fam_marital, x.leisure_rec, 
+                             x.company, x.alcohol_drug, x.pao, x.antisocial), nomatch=0, 
+                             on = .(xnmbr = xnmbr, assmnt_date <= sup_close_date, assmnt_date >= case_grant_date)]
 
 # remove redundant rows
 case_disp_assmnt <- unique(case_disp_assmnt)
