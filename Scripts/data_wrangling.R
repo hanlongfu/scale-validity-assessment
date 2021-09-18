@@ -7,7 +7,7 @@ lapply(c("data.table", "tidyverse","lme4"), require, character.only=TRUE)
 ############################################
 
 # read in court cases data
-cases1 <- read_fwf("Raw_Data/Probation_Case_20210311.txt", 
+cases1 <- read_fwf("data.txt", 
                    fwf_cols("submit_date"=c(1,10), 
                             "agency"=c(11,19),
                             "source"=c(20,22),
@@ -56,8 +56,8 @@ disp1 <- read_fwf("Raw_Data/Probation_Disposition_20210311.txt",
                            "dispo_desc"=c(60,89),
                            "record_type"=c(90,90)), na = c("", "NA"))
 
-# read in lscmi data
-lsmci <- read_fwf("Raw_Data/Probation_Assessment_20210311.txt", 
+# read in scale data
+scale <- read_fwf("Raw_Data/Probation_Assessment_20210311.txt", 
                    fwf_cols("submit_date"=c(1,10), 
                             "xnmbr"=c(23,31), 
                             "assmnt_date"=c(57,66),
@@ -95,8 +95,8 @@ setDT(disp1)[, .N, by=xnmbr]
 #170,239 unique individuals in cases data
 setDT(cases1)[, .N, by=xnmbr]
 
-#77,729 unique individuals in lscmi data
-setDT(lscmi)[, .N, by=xnmbr]
+#77,729 unique individuals in scale data
+setDT(scale)[, .N, by=xnmbr]
 
 ## 9512 cases that had one disposition only
 disp1[, .N, by=xnmbr][N<=1][]
@@ -255,7 +255,7 @@ case_disp0$revoked <- 0
 case_disp0$revoked[case_disp0$dispo_desc %chin% revoke_code ] <- 1
 
 ######################
-### Merge with lscmi
+### Merge with scale
 ######################
 
 case_disp_assmnt <- assmnt[case_disp0, 
